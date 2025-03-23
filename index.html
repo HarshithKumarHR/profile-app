@@ -3,113 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Profile App</title>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 500px; margin: 20px auto; }
-        input { display: block; margin: 10px 0; padding: 8px; width: 100%; }
-        button { padding: 8px 12px; margin: 5px 0; cursor: pointer; }
-        .profile { border: 1px solid #ccc; padding: 10px; margin: 10px 0; display: flex; align-items: center; }
-        .profile img { width: 50px; height: 50px; border-radius: 50%; margin-right: 10px; }
-        .actions button { margin-left: 5px; }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Profile App</h1>
+    <div class="container">
+        <h1>Profile App</h1>
+        <div class="profile-grid">
+            <div class="profile-card" onclick="showDetails('John Doe', 'Web Developer', 'john.jpg')">
+                <img src="john.jpg" alt="John Doe">
+                <h2>John Doe</h2>
+                <p>Web Developer</p>
+            </div>
+            <div class="profile-card" onclick="showDetails('Jane Smith', 'UI Designer', 'jane.jpg')">
+                <img src="jane.jpg" alt="Jane Smith">
+                <h2>Jane Smith</h2>
+                <p>UI Designer</p>
+            </div>
+        </div>
+    </div>
 
-    <h3>Add Data</h3>
-    <input type="text" id="name" placeholder="Enter your name">
-    <input type="text" id="message" placeholder="Enter your message">
-    <input type="file" id="profile-pic" accept="image/*">
-    <button onclick="addData()">Add to Firebase</button>
+    <div id="profile-details" class="hidden">
+        <span class="close-btn" onclick="hideDetails()">&times;</span>
+        <img id="detail-img" src="" alt="Profile Image">
+        <h2 id="detail-name"></h2>
+        <p id="detail-role"></p>
+    </div>
 
-    <h3>Search</h3>
-    <input type="text" id="search" placeholder="Search profiles" oninput="loadData()">
-
-    <h3>Stored Data</h3>
-    <div id="data-list"></div>
-
-    <script>
-        const firebaseConfig = {
-  apiKey: "AIzaSyDQp-6-NsbgjM7vNqVlsFS4EU0bHaMWpqk",
-  authDomain: "my-data-d1a95.firebaseapp.com",
-  projectId: "my-data-d1a95",
-  storageBucket: "my-data-d1a95.firebasestorage.app",
-  messagingSenderId: "879054903639",
-  appId: "1:879054903639:web:b0720fdd3177468f138612",
-  measurementId: "G-N2WTKCJFG9"
-        };
-
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
-        function addData() {
-            const name = document.getElementById('name').value;
-            const message = document.getElementById('message').value;
-            const pic = document.getElementById('profile-pic').files[0];
-            const reader = new FileReader();
-
-            reader.onload = function (e) {
-                const profilePic = e.target.result;
-                db.collection('profiles').add({ name, message, profilePic })
-                    .then(() => {
-                        alert('Data added!');
-                        loadData();
-                    })
-                    .catch(error => console.error('Error adding document: ', error));
-            };
-            if (pic) reader.readAsDataURL(pic);
-            else alert('Please select a profile picture.');
-        }
-
-        function loadData() {
-            const search = document.getElementById('search').value.toLowerCase();
-            const dataList = document.getElementById('data-list');
-            dataList.innerHTML = '';
-
-            db.collection('profiles').get().then(snapshot => {
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    if (data.name.toLowerCase().includes(search)) {
-                        const div = document.createElement('div');
-                        div.className = 'profile';
-                        div.innerHTML = `
-                            <img src="${data.profilePic}" alt="Profile Picture">
-                            <div>
-                                <strong>${data.name}</strong>
-                                <p>${data.message}</p>
-                            </div>
-                            <div class="actions">
-                                <button onclick="editData('${doc.id}', '${data.name}', '${data.message}')">Edit</button>
-                                <button onclick="deleteData('${doc.id}')">Delete</button>
-                            </div>
-                        `;
-                        dataList.appendChild(div);
-                    }
-                });
-            });
-        }
-
-        function editData(id, name, message) {
-            const newName = prompt('Edit Name:', name);
-            const newMessage = prompt('Edit Message:', message);
-            if (newName !== null && newMessage !== null) {
-                db.collection('profiles').doc(id).update({ name: newName, message: newMessage })
-                    .then(() => loadData())
-                    .catch(error => console.error('Error updating document: ', error));
-            }
-        }
-
-        function deleteData(id) {
-            if (confirm('Are you sure you want to delete this profile?')) {
-                db.collection('profiles').doc(id).delete()
-                    .then(() => loadData())
-                    .catch(error => console.error('Error deleting document: ', error));
-            }
-        }
-
-        window.onload = loadData;
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
